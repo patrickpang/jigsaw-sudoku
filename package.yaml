@@ -1,48 +1,48 @@
-name:                jigsaw-sudoku
-version:             0.1.0.0
-github:              "githubuser/jigsaw-sudoku"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+name: jigsaw-sudoku
+version: 0.1.0.0
+github: "patrickpang/jigsaw-sudoku"
+license: BSD3
+author: "Patrick Pang"
+maintainer: "imptrik@gmail.com"
+copyright: "2019 Patrick Pang"
 
 extra-source-files:
-- README.md
-- ChangeLog.md
+  - README.md
+  - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+# synopsis:            Jigsaw Sudoku Game in Haskell
+# category:            Games
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/jigsaw-sudoku#readme>
+description: Please see the README on GitHub at <https://github.com/patrickpang/jigsaw-sudoku#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+  - base >= 4.7 && < 5
 
 library:
   source-dirs: src
 
 executables:
   jigsaw-sudoku-exe:
-    main:                Main.hs
-    source-dirs:         app
+    main: Main.hs
+    source-dirs: app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - jigsaw-sudoku
+      - jigsaw-sudoku
 
 tests:
   jigsaw-sudoku-test:
-    main:                Spec.hs
-    source-dirs:         test
+    main: Spec.hs
+    source-dirs: test
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
     dependencies:
-    - jigsaw-sudoku
+      - jigsaw-sudoku

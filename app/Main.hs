@@ -18,7 +18,7 @@ main = do
     windowTop = (screenHeight - windowHeight) `div` 2
     window = InWindow "Jigsaw Sudoku" (windowWidth, windowHeight) (windowLeft, windowTop)
 
-  game <- loadGame "../map.txt"
+  game <- loadGame "maps/map.txt"
   play window white 100 game renderWorld handleEvent updateWorld
 
 renderWorld :: Game -> Picture

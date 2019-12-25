@@ -1,6 +1,6 @@
 module Colors where
 
-import  Graphics.Gloss.Data.Color
+import Graphics.Gloss.Data.Color
 
 colorsOfBlocks :: [Color]
 colorsOfBlocks = 

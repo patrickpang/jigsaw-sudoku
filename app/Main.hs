@@ -2,6 +2,8 @@ module Main where
   
 import Serialization
 import Model
+import Logic
+
 import Colors
 
 import Graphics.Gloss
@@ -26,6 +28,7 @@ main = do
 
   play window white 100 state renderWorld handleEvent updateWorld
 
+
 updateWorld :: Float -> State -> State
 updateWorld _ state = state
 
@@ -44,22 +47,24 @@ renderGame game focus = pictures
   ]
 
 renderBoard :: Game -> Picture
-renderBoard Game{board=board, config=config} = pictures $ concat 
+renderBoard game = pictures $ concat 
   [
     [
       translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $ 
-        renderCell cell (config !! r !! c)
+        renderCell cell ((config game) !! r !! c) (elem (r, c) conflicts)
       | (c, cell) <- zip [0..] row
     ] 
-    | (r, row) <- zip [0..] board
+    | (r, row) <- zip [0..] (board game)
   ]
+  where
+    conflicts = allConflicts game
 
-renderCell :: Cell -> Int -> Picture
-renderCell cell block = pictures 
+renderCell :: Cell -> Int -> Bool -> Picture
+renderCell cell block hasConflicts = pictures 
   [
     color (colorsOfBlocks !! block) $ rectangleSolid cellLength cellLength,
     color white $ rectangleWire cellLength cellLength,
-    color black $ translate (- cellLength / 4) (- cellLength / 4) $ 
+    color (if hasConflicts then red else black) $ translate (- cellLength / 4) (- cellLength / 4) $ 
       scale 0.2 0.2 $ text $ maybe "" show cell
   ]
 
@@ -71,10 +76,55 @@ renderFocus (r, c) =
 
 handleEvent :: Event -> State -> State
 
-handleEvent (EventKey (SpecialKey KeyUp) Up _ _) state@(Playing{focus=focus}) = state{focus = moveFocus focus (-1) 0}
-handleEvent (EventKey (SpecialKey KeyDown) Up _ _) state@(Playing{focus=focus}) = state{focus = moveFocus focus 1 0}
-handleEvent (EventKey (SpecialKey KeyLeft) Up _ _) state@(Playing{focus=focus}) = state{focus = moveFocus focus 0 (-1)}
-handleEvent (EventKey (SpecialKey KeyRight) Up _ _) state@(Playing{focus=focus}) = state{focus = moveFocus focus 0 1}
+handleEvent (EventKey (SpecialKey KeyUp) Up _ _) state@(Playing{focus=focus}) = 
+  state{focus = moveFocus focus (-1) 0}
+handleEvent (EventKey (SpecialKey KeyDown) Up _ _) state@(Playing{focus=focus}) = 
+  state{focus = moveFocus focus 1 0}
+handleEvent (EventKey (SpecialKey KeyLeft) Up _ _) state@(Playing{focus=focus}) = 
+  state{focus = moveFocus focus 0 (-1)}
+handleEvent (EventKey (SpecialKey KeyRight) Up _ _) state@(Playing{focus=focus}) = 
+  state{focus = moveFocus focus 0 1}
+
+handleEvent (EventKey (SpecialKey KeyDelete) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus Nothing}
+
+handleEvent (EventKey (SpecialKey KeyPad1) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 1)}
+handleEvent (EventKey (SpecialKey KeyPad2) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 2)}
+handleEvent (EventKey (SpecialKey KeyPad3) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 3)}
+handleEvent (EventKey (SpecialKey KeyPad4) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 4)}
+handleEvent (EventKey (SpecialKey KeyPad5) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 5)}
+handleEvent (EventKey (SpecialKey KeyPad6) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 6)}
+handleEvent (EventKey (SpecialKey KeyPad7) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 7)}
+handleEvent (EventKey (SpecialKey KeyPad8) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 8)}
+handleEvent (EventKey (SpecialKey KeyPad9) Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 9)}
+
+handleEvent (EventKey (Char '1') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 1)}
+handleEvent (EventKey (Char '2') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 2)}
+handleEvent (EventKey (Char '3') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 3)}
+handleEvent (EventKey (Char '4') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 4)}
+handleEvent (EventKey (Char '5') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 5)}
+handleEvent (EventKey (Char '6') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 6)}
+handleEvent (EventKey (Char '7') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 7)}
+handleEvent (EventKey (Char '8') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 8)}
+handleEvent (EventKey (Char '9') Up _ _) state@(Playing{game=game, focus=focus}) = 
+  state{game = makeMove game focus (Just 9)}
 
 handleEvent _ state = state
 

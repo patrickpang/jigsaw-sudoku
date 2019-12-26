@@ -3,11 +3,11 @@ module Colors where
 import Graphics.Gloss.Data.Color
 
 colorsOfBlocks :: [Color]
-colorsOfBlocks = 
+colorsOfBlocks = map (withAlpha 0.5)
   [
     red,
     green,
-    withAlpha 0.5 blue,
+    blue,
     yellow,
     cyan,
     magenta,

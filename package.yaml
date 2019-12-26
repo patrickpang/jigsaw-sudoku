@@ -25,6 +25,9 @@ dependencies:
   - gloss == 1.13.*
   - array == 0.5.*
   - split == 0.2.*
+  - set-cover == 0.0.9
+  - random == 1.1
+  - transformers == 0.5.6.2
 
 library:
   source-dirs: src

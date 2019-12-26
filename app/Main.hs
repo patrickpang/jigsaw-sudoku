@@ -24,7 +24,7 @@ main = do
     windowTop = (screenHeight - windowHeight) `div` 2
     window = InWindow "Jigsaw Sudoku" (windowWidth, windowHeight) (windowLeft, windowTop)
 
-  game <- loadGame "maps/map.txt"
+  game <- loadGame "maps/map-solve.txt"
   let state = Playing{game=game, focus=(0,0)}
 
   play window white 100 state renderWorld handleEvent updateWorld

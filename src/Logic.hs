@@ -3,34 +3,25 @@ module Logic where
 import Model
 
 import Data.List
+import Data.Array
 import Data.Maybe
 import Data.Function
 
 makeMove :: Game -> Coord -> Cell -> Game
-makeMove game (r, c) cell =
-  let 
-    newBoard = 
-      [
-        [ 
-          if (r == r') && (c == c') then cell else cell' 
-          | (c', cell') <- zip [0..] row
-        ] 
-        | (r', row) <- zip [0..] (board game)
-      ]
-  in
-    game{board = newBoard}
+makeMove game coord cell =
+  game{board = (board game) // [(coord, cell)]}
   -- assumption: valid number (from UI)
   -- replace both empty and occupied cell
   -- no need to check conflicts, which will be shown by UI
   -- TODO: initial cells -> return same board
 
 allConflicts :: Game -> [Coord]
-allConflicts Game{board=board, config=config, blocks=blocks} =
+allConflicts Game{board=board, blocks=blocks} =
   union blockConflicts $ union rowConflicts columnConflicts
   where
     rowConflicts = conflictsOn (\((r, _), _) -> r) board
     columnConflicts = conflictsOn (\((_, c), _) -> c) board
-    blockConflicts = conflictsOn (\((r, c), _) -> config !! r !! c) board
+    blockConflicts = conflictsOn (\((r, c), _) -> blocks ! (r, c)) board
 
     conflictsOn :: Ord a => ((Coord, Cell) -> a) -> Board -> [Coord] 
     conflictsOn f board = 
@@ -46,10 +37,6 @@ allConflicts Game{board=board, config=config, blocks=blocks} =
     
     groupSortOn :: Ord b => (a -> b) -> [a] -> [[a]]
     groupSortOn f xs = groupBy ((==) `on` f) $ sortOn f xs
-
-    assocs :: Board -> [(Coord, Cell)]
-    assocs board =
-      concat [[((r, c), cell) | (c, cell) <- zip [0..] row] | (r, row) <- zip [0..] board]
   
     -- find conflicting cells globally
     -- for highlight of errors before rendering

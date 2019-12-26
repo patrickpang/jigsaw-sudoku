@@ -23,6 +23,8 @@ dependencies:
   - base >= 4.7 && < 5
   - containers == 0.6.*
   - gloss == 1.13.*
+  - array == 0.5.*
+  - split == 0.2.*
 
 library:
   source-dirs: src

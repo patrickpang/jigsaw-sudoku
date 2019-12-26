@@ -1,11 +1,12 @@
 module Main where
   
-import Serialization
+import Persistence
 import Model
 import Logic
 
 import Colors
 
+import Data.Array
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Interface.Environment (getScreenSize)
@@ -47,14 +48,11 @@ renderGame game focus = pictures
   ]
 
 renderBoard :: Game -> Picture
-renderBoard game = pictures $ concat 
+renderBoard game = pictures
   [
-    [
-      translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $ 
-        renderCell cell ((config game) !! r !! c) (elem (r, c) conflicts)
-      | (c, cell) <- zip [0..] row
-    ] 
-    | (r, row) <- zip [0..] (board game)
+    translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $ 
+      renderCell cell ((blocks game) ! (r,c)) (elem (r, c) conflicts)
+    | ((r, c), cell) <- assocs $ board game
   ]
   where
     conflicts = allConflicts game

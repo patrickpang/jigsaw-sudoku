@@ -1,10 +1,11 @@
 module Model where
 
+import Data.Array
+
 type Cell = Maybe Int
 type Coord = (Int, Int)
-type Board = [[Cell]]
 
-type Config = [[Int]]
-type Blocks = [[Coord]]
+type Board = Array Coord Cell
+type Blocks = Array Coord Int
 
-data Game = Game { board :: Board, config :: Config, blocks :: Blocks } deriving (Show)
+data Game = Game {board :: Board, blocks :: Blocks} deriving (Show)

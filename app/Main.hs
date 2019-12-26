@@ -7,6 +7,7 @@ import Solver (solveGame)
 
 import Colors
 
+import Data.List
 import Data.Array
 import Data.Char (digitToInt)
 import Graphics.Gloss
@@ -87,31 +88,20 @@ handleEvent (EventKey (SpecialKey KeyLeft) Up _ _) state@(Playing{focus=focus}) 
 handleEvent (EventKey (SpecialKey KeyRight) Up _ _) state@(Playing{focus=focus}) = 
   state{focus = moveFocus focus 0 1}
 
-handleEvent (EventKey (SpecialKey KeyDelete) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus Nothing}
-
-handleEvent (EventKey (SpecialKey KeyPad1) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 1)}
-handleEvent (EventKey (SpecialKey KeyPad2) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 2)}
-handleEvent (EventKey (SpecialKey KeyPad3) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 3)}
-handleEvent (EventKey (SpecialKey KeyPad4) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 4)}
-handleEvent (EventKey (SpecialKey KeyPad5) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 5)}
-handleEvent (EventKey (SpecialKey KeyPad6) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 6)}
-handleEvent (EventKey (SpecialKey KeyPad7) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 7)}
-handleEvent (EventKey (SpecialKey KeyPad8) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 8)}
-handleEvent (EventKey (SpecialKey KeyPad9) Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 9)}
+handleEvent (EventKey (SpecialKey k) Up _ _) state@(Playing{game=game, focus=focus}) 
+  | elem k keys = -- Input
+    state{game = makeMove game focus (fmap (+1) (elemIndex k keys))} 
+  | k == KeyDelete || k == KeyBackspace = -- Erase
+    state{game = makeMove game focus Nothing}
+  | otherwise = state
+  where
+    keys = [KeyPad1, KeyPad2, KeyPad3, KeyPad4, KeyPad5, KeyPad6, KeyPad7, KeyPad8, KeyPad9]
 
 handleEvent (EventKey (Char c) Up _ _) state@(Playing{game=game, focus=focus, solution=solution})
   | '1' <= c && c <= '9' = -- Input
     state{game = makeMove game focus (Just $ digitToInt c)}
+  | c == '\b' = -- Erase
+    state{game = makeMove game focus Nothing}
   | c == 'h' = -- Hint
     state{game = makeMove game focus (solution ! focus)}
   | c == 's' = -- Solve

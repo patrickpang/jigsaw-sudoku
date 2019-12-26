@@ -2,7 +2,6 @@ module Persistence (loadGame, saveGame) where
 
 import Model
 
-import Data.List
 import Data.List.Split (chunksOf)
 import Data.Array
 import Data.Char (digitToInt, intToDigit)

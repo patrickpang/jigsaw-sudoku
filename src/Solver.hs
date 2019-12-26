@@ -12,7 +12,6 @@ import Data.Array
 import Data.Maybe
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Char (digitToInt)
 
 data X = Pos Int Int | Row Int Int | Column Int Int | Block Int Int
          deriving (Eq, Ord, Show)

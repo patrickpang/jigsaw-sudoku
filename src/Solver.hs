@@ -1,6 +1,6 @@
 -- Modified from https://hub.darcs.net/thielema/set-cover/browse/example/Sudoku.hs
 
-module Solver where
+module Solver (solveGame) where
 
 import Model
 
@@ -28,13 +28,12 @@ assign n r c b =
 assigns :: Blocks -> [Assign (Set X)]
 assigns blocks = [assign n r c b | n <- [1..9], r <- [0..8], c <- [0..8], let b = blocks ! (r, c)]
 
-solveGame :: Game -> Game
+solveGame :: Game -> Board
 solveGame game =
    let
       initAssigns = assigns $ blocks game
       occupied = filter (isJust . snd) $ assocs $ board game
       occupiedAssigns = [assign n r c b | ((r, c), (Just n)) <- occupied, let b = (blocks game) ! (r, c)]
       solution = head $ ESC.search $ foldl (flip ESC.updateState) (ESC.initState initAssigns) occupiedAssigns
-      board' = array ((0, 0), (8, 8)) [((r, c), (Just n)) | ((r, c), n) <- solution]
    in
-      game{board=board'}
+      array ((0, 0), (8, 8)) [((r, c), (Just n)) | ((r, c), n) <- solution]

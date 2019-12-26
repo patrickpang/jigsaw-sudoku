@@ -41,5 +41,7 @@ allConflicts Game{board=board, blocks=blocks} =
     -- find conflicting cells globally
     -- for highlight of errors before rendering
 
--- isEnded
--- no Nothing & no conflicts
+isEnded :: Game -> Bool
+isEnded game =
+  (all isJust $ elems $ board game) && (null $ allConflicts game)
+  -- no Nothing & no conflicts

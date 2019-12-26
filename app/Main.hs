@@ -3,16 +3,18 @@ module Main where
 import Persistence
 import Model
 import Logic
+import Solver (solveGame)
 
 import Colors
 
 import Data.Array
+import Data.Char (digitToInt)
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Interface.Environment (getScreenSize)
 
 data State =
-  Playing {game :: Game, focus :: Coord}
+  Playing {game :: Game, focus :: Coord, solution :: Board}
 
 main :: IO ()
 main = do
@@ -24,8 +26,10 @@ main = do
     windowTop = (screenHeight - windowHeight) `div` 2
     window = InWindow "Jigsaw Sudoku" (windowWidth, windowHeight) (windowLeft, windowTop)
 
-  game <- loadGame "maps/map-solve.txt"
-  let state = Playing{game=game, focus=(0,0)}
+  game <- loadGame "maps/map.txt"
+  let
+    solution = solveGame game
+    state = Playing{game=game, focus=(0,0), solution=solution}
 
   play window white 100 state renderWorld handleEvent updateWorld
 
@@ -105,24 +109,14 @@ handleEvent (EventKey (SpecialKey KeyPad8) Up _ _) state@(Playing{game=game, foc
 handleEvent (EventKey (SpecialKey KeyPad9) Up _ _) state@(Playing{game=game, focus=focus}) = 
   state{game = makeMove game focus (Just 9)}
 
-handleEvent (EventKey (Char '1') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 1)}
-handleEvent (EventKey (Char '2') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 2)}
-handleEvent (EventKey (Char '3') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 3)}
-handleEvent (EventKey (Char '4') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 4)}
-handleEvent (EventKey (Char '5') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 5)}
-handleEvent (EventKey (Char '6') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 6)}
-handleEvent (EventKey (Char '7') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 7)}
-handleEvent (EventKey (Char '8') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 8)}
-handleEvent (EventKey (Char '9') Up _ _) state@(Playing{game=game, focus=focus}) = 
-  state{game = makeMove game focus (Just 9)}
+handleEvent (EventKey (Char c) Up _ _) state@(Playing{game=game, focus=focus, solution=solution})
+  | '1' <= c && c <= '9' = -- Input
+    state{game = makeMove game focus (Just $ digitToInt c)}
+  | c == 'h' = -- Hint
+    state{game = makeMove game focus (solution ! focus)}
+  | c == 's' = -- Solve
+    state{game = game{board = solution}}
+  | otherwise = state
 
 handleEvent _ state = state
 

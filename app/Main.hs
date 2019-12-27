@@ -2,8 +2,7 @@
 
 module Main where
   
-import Persistence
-import Model
+import Game
 import Logic
 import Solver (solveGame)
 

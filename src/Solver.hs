@@ -2,7 +2,7 @@
 
 module Solver (solveGame) where
 
-import Model
+import Game
 
 -- import qualified Math.SetCover.BitSet as BitSet
 -- import qualified Math.SetCover.Bit as Bit

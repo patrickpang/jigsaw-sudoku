@@ -2,7 +2,7 @@
 
 module Logic where
 
-import Model
+import Game
 
 import Data.List
 import Data.Array

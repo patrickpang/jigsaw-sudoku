@@ -4,6 +4,7 @@ module Main where
   
 import Game
 import Logic
+import History
 import Solver (solveGame)
 
 import Colors
@@ -32,16 +33,17 @@ mainHelp = do
   -- TODO: docopt format USAGE
 
 data State =
-  Playing {game :: Game, focus :: Coord, solution :: Board, filename :: String}
+  Playing {game :: Game, history :: History, focus :: Coord, solution :: Board, filename :: FilePath}
 
 mainGame :: String -> IO ()
 mainGame filename = do
   game <- loadGame filename
+  history <- loadHistory (locateHistory filename) (board game)
   -- TODO: generate for new file
   (screenWidth, screenHeight) <- getScreenSize
   let 
     solution = solveGame game
-    state = Playing{game, focus=(0,0), solution, filename}
+    state = Playing{game, focus=(0,0), solution, filename, history}
 
     windowWidth = 360
     windowHeight = 360
@@ -104,39 +106,32 @@ handleEvent (EventKey (SpecialKey KeyLeft) Up _ _) state@(Playing{focus}) =
 handleEvent (EventKey (SpecialKey KeyRight) Up _ _) state@(Playing{focus}) = 
   return state{focus = moveFocus focus 0 1}
 
-handleEvent (EventKey (SpecialKey k) Up _ _) state@(Playing{game, focus, filename}) 
-  | elem k keys = do -- Input
-    let game' = makeMove game focus (fmap (+1) (elemIndex k keys))
-    saveGame game' filename
-    return state{game=game'} 
-  | k == KeyDelete || k == KeyBackspace = do -- Erase
-    let game' = makeMove game focus Nothing
-    saveGame game' filename
-    return state{game=game'}
+handleEvent (EventKey (SpecialKey k) Up _ _) state@(Playing{game, focus, history=History{initial}}) 
+  | elem k keys = -- Input
+    updateAfterMove state $ makeMove game initial focus (fmap (+1) (elemIndex k keys)) 
+  | k == KeyDelete || k == KeyBackspace = -- Erase
+    updateAfterMove state $ makeMove game initial focus Nothing
   | otherwise = return state
   where
     keys = [KeyPad1, KeyPad2, KeyPad3, KeyPad4, KeyPad5, KeyPad6, KeyPad7, KeyPad8, KeyPad9]
 
-handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, filename})
-  | '1' <= c && c <= '9' = do -- Input
-    let game' = makeMove game focus (Just $ digitToInt c)
-    saveGame game' filename
-    return state{game=game'}
-  | c == '\b' = do -- Erase
-    let game' = makeMove game focus Nothing
-    saveGame game' filename
-    return state{game=game'}
-  | c == 'h' = do -- Hint
-    let game' = makeMove game focus (solution ! focus)
-    saveGame game' filename
-    return state{game=game'}
-  | c == 's' = do -- Solve
-    let game' = game{board = solution}
-    saveGame game' filename
-    return state{game=game'}
+handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, history=History{initial}})
+  | '1' <= c && c <= '9' = -- Input
+    updateAfterMove state $ makeMove game initial focus (Just $ digitToInt c)
+  | c == '\b' = -- Erase
+    updateAfterMove state $ makeMove game initial focus Nothing
+  | c == 'h' = -- Hint
+    updateAfterMove state $ makeMove game initial focus (solution ! focus)
+  | c == 's' = -- Solve
+    updateAfterMove state $ game{board = solution}
   | otherwise = return state
 
 handleEvent _ state = return state
+
+updateAfterMove :: State -> Game -> IO State
+updateAfterMove state@(Playing{filename}) game' = do
+  saveGame game' filename
+  return state{game=game'}
 
 moveFocus :: Coord -> Int -> Int -> Coord
 moveFocus (r, c) dr dc =

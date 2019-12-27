@@ -9,9 +9,11 @@ import Data.Array
 import Data.Maybe
 import Data.Function
 
-makeMove :: Game -> Coord -> Cell -> Game
-makeMove game coord cell =
-  game{board = (board game) // [(coord, cell)]}
+makeMove :: Game -> Board -> Coord -> Cell -> Game
+makeMove game initial coord cell =
+  if isNothing $ initial ! coord 
+  then game{board = (board game) // [(coord, cell)]} 
+  else game
   -- assumption: valid number (from UI)
   -- replace both empty and occupied cell
   -- no need to check conflicts, which will be shown by UI

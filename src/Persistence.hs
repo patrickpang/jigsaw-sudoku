@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Persistence (loadGame, saveGame) where
 
 import Model
@@ -17,7 +19,7 @@ loadGame filename = do
     board = parseBoard boardRows
     blocks = parseBlocks blocksRows
   
-  return (Game {board=board, blocks=blocks})
+  return (Game {board, blocks})
 
 saveGame :: Game -> String -> IO ()
 saveGame game filename = do

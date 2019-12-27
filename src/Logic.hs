@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Logic where
 
 import Model
@@ -16,7 +18,7 @@ makeMove game coord cell =
   -- TODO: initial cells -> return same board
 
 allConflicts :: Game -> [Coord]
-allConflicts Game{board=board, blocks=blocks} =
+allConflicts Game{board, blocks} =
   union blockConflicts $ union rowConflicts columnConflicts
   where
     rowConflicts = conflictsOn (\((r, _), _) -> r) board

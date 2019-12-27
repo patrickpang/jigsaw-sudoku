@@ -115,7 +115,7 @@ handleEvent (EventKey (SpecialKey k) Up _ _) state@(Playing{game, focus, history
   where
     keys = [KeyPad1, KeyPad2, KeyPad3, KeyPad4, KeyPad5, KeyPad6, KeyPad7, KeyPad8, KeyPad9]
 
-handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, history=History{initial}})
+handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, history=history@History{initial}})
   | '1' <= c && c <= '9' = -- Input
     updateAfterMove state $ makeMove game initial focus (Just $ digitToInt c)
   | c == '\b' = -- Erase
@@ -124,14 +124,33 @@ handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, his
     updateAfterMove state $ makeMove game initial focus (solution ! focus)
   | c == 's' = -- Solve
     updateAfterMove state $ game{board = solution}
+  | c == 'u' = -- Undo
+    updateAfterUndoRedo state $ undoMove history $ board game
+  | c == 'r' = -- Redo
+    updateAfterUndoRedo state $ redoMove history $ board game
   | otherwise = return state
 
 handleEvent _ state = return state
 
 updateAfterMove :: State -> Game -> IO State
-updateAfterMove state@(Playing{filename}) game' = do
-  saveGame game' filename
-  return state{game=game'}
+updateAfterMove state@(Playing{game, history, filename}) game' = do
+  if board game /= board game' then do
+    let history' = addMove history $ board game
+    saveGame game' filename
+    saveHistory history' $ locateHistory filename
+    return state{game=game', history=history'}
+  else do
+    return state
+
+updateAfterUndoRedo :: State -> (Board, History) -> IO State
+updateAfterUndoRedo state@(Playing{game, filename}) (board', history') = do
+  if board' /= board game then do
+    let game' = game{board=board'}
+    saveGame game' filename
+    saveHistory history' $ locateHistory filename
+    return state{game=game', history=history'}
+  else do
+    return state
 
 moveFocus :: Coord -> Int -> Int -> Coord
 moveFocus (r, c) dr dc =

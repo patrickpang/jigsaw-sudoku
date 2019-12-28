@@ -14,9 +14,9 @@ import Data.List
 import Data.Array
 import Data.Char (digitToInt)
 import System.Environment (getArgs)
+import System.FilePath (takeBaseName)
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
-import Graphics.Gloss.Interface.Environment (getScreenSize)
 
 main :: IO ()
 main = do
@@ -40,31 +40,32 @@ mainGame :: Maybe FilePath -> IO ()
 mainGame filename = do
   game <- loadGame filename
   history <- loadHistory (locateHistory filename) (board game)
-  (screenWidth, screenHeight) <- getScreenSize
   let 
     solution = solveGame game
     state = Playing{game, focus=(0,0), solution, filename, history}
-
-    windowWidth = 360
-    windowHeight = 360
-    windowLeft = (screenWidth - windowWidth) `div` 2
-    windowTop = (screenHeight - windowHeight) `div` 2
-    window = InWindow "Jigsaw Sudoku" (windowWidth, windowHeight) (windowLeft, windowTop)
   
-  playIO window white 100 state renderWorld handleEvent updateWorld
+  playIO FullScreen white 100 state renderWorld handleEvent updateWorld
 
 updateWorld :: Float -> State -> IO State
 updateWorld _ state = return state
 
 renderWorld :: State -> IO Picture
-renderWorld Playing{game, focus} = renderGame game focus
+renderWorld Playing{game, focus, filename} = return $ pictures 
+  [
+    renderGame game focus,
+    renderFilename filename
+  ]
 
+renderFilename :: Maybe FilePath -> Picture
+renderFilename filename = 
+  translate (-180) 200 $ scale 0.2 0.2 $ text $ maybe "" takeBaseName filename
 
+  
 cellLength :: Float
 cellLength = 40.0
 
-renderGame :: Game -> Coord -> IO Picture
-renderGame game focus = return $ pictures 
+renderGame :: Game -> Coord -> Picture
+renderGame game focus = pictures 
   [
     renderBoard game,
     renderFocus focus

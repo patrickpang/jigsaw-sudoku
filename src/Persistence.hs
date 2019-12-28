@@ -8,8 +8,6 @@ import Generator
 import Data.List.Split (chunksOf)
 import Data.Array
 import Data.Char (digitToInt, intToDigit)
-import Data.Maybe
-import Control.Monad (when)
 import System.Directory (doesFileExist)
 
 instance Show Game where

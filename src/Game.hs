@@ -2,11 +2,7 @@
 
 module Game where
 
-import Data.List.Split (chunksOf)
 import Data.Array
-import Data.Char (digitToInt, intToDigit)
-import Data.Maybe
-import Control.Monad (when)
 
 type Cell = Maybe Int
 type Coord = (Int, Int)

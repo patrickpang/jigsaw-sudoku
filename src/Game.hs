@@ -12,7 +12,18 @@ type Coord = (Int, Int)
 type Board = Array Coord Cell
 type Blocks = Array Coord Int
 
-data Game = Game {board :: Board, blocks :: Blocks} deriving (Show)
+data Game = Game {board :: Board, blocks :: Blocks}
+
+instance Show Game where
+  show Game{board, blocks} =
+    let
+      blocksRows = dumpBlocks blocks
+      boardRows = dumpBoard board
+    in
+      unlines $ blocksRows ++ boardRows
+
+saveGame :: Game -> FilePath -> IO ()
+saveGame game filename = writeFile filename $ show game
 
 loadGame :: FilePath -> IO Game
 loadGame filename = do
@@ -26,15 +37,6 @@ loadGame filename = do
     blocks = parseBlocks blocksRows
   
   return (Game {board, blocks})
-
-saveGame :: Game -> FilePath -> IO ()
-saveGame Game{board, blocks} filename = do
-  let
-    blocksRows = dumpBlocks blocks
-    boardRows = dumpBoard board
-    content = unlines $ blocksRows ++ boardRows
-
-  writeFile filename content
 
 parseBoard :: [String] -> Board
 parseBoard lines = 

@@ -1,17 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
--- Modified from https://hub.darcs.net/thielema/set-cover/browse/example/Sudoku.hs
 module Generator where
 
 import Game
 import Utils (pick, shuffle)
-import Solver (assigns)
-
-import qualified Math.SetCover.Exact as ESC
+import SetCover
 
 import Data.List
 import Data.Array
 import Data.Graph
+import qualified Math.SetCover.Exact as ESC
 
 generateGame :: IO Game
 generateGame = do
@@ -24,10 +22,10 @@ generateGame = do
 generateBlocks :: IO Blocks
 generateBlocks = do
   -- start with regular blocks layout
-  reshape regularBlocks 
+  transformBlocks regularBlocks 
   where
-    reshape :: Blocks -> IO Blocks
-    reshape blocks = do
+    transformBlocks :: Blocks -> IO Blocks
+    transformBlocks blocks = do
       let blockPeers = map (blockCells blocks) [0..8] 
       -- repeat until no regular blocks
       if not $ any isRegularBlock blockPeers 
@@ -42,7 +40,7 @@ generateBlocks = do
 
         -- retry if no valid neighbors
         if null neighbors 
-        then reshape blocks
+        then transformBlocks blocks
         else do
           neighbor <- pick neighbors
           --  swap an outer cell with a neighbor cell of another block
@@ -50,8 +48,8 @@ generateBlocks = do
 
           --  retry if the blocks become disconnected
           if all isConnectedBlock $ map (blockCells blocks') [blocks ! cell, blocks ! neighbor]
-          then reshape blocks'
-          else reshape blocks
+          then transformBlocks blocks'
+          else transformBlocks blocks
 
 regularBlocks :: Blocks
 regularBlocks = 
@@ -102,28 +100,28 @@ isRegularBlock cells =
     columns = nub $ map snd cells
 
 -- generate board
+-- Modified from https://hub.darcs.net/thielema/set-cover/browse/example/Sudoku.hs
 
 generateBoard :: Blocks -> IO Board
 generateBoard blocks = do
   a <- shuffle $ assigns blocks
   let
-    solution = head $ ESC.partitions a
-    board = array ((0, 0), (8, 8)) [((r, c), (Just n)) | ((r, c), n) <- solution]
-  return $ minimizeBoard board
+    solution = head $ ESC.partitions $ ESC.bitVectorFromSetAssigns a
+    minSolution = minimizeSolution blocks solution
+    emptyBoard = listArray ((0, 0), (8, 8)) $ replicate 81 Nothing
+  return $ emptyBoard // [((r, c), (Just n)) | ((r, c), n) <- minSolution]
 
 -- minimize: a single solution
 
-minimizeBoard :: Board -> Board
-minimizeBoard board = board
+minimizeSolution :: Blocks -> [Association] -> [Association]
+minimizeSolution blocks solution = 
+  reduce (ESC.initState initAssigns) [] solutionAssigns
+  where
+    initAssigns = ESC.bitVectorFromSetAssigns $ assigns blocks
+    solutionAssigns = ESC.bitVectorFromSetAssigns $ [assign n r c b | ((r, c), n) <- solution, let b = blocks ! (r, c)]
 
--- minimizePuzzle :: [Cell] -> [Cell]
--- minimizePuzzle =
---     let asnMap = foldMap (\asn -> Map.singleton (ESC.label asn) asn) bitAssigns
---         lookupAssign =
---             flip (Map.findWithDefault (error "coordinates not available")) asnMap
---         go state xs (y:ys) =
---             case ESC.search $ foldl (flip ESC.updateState) state ys of
---             [_] -> go state xs ys
---             _ -> go (ESC.updateState y state) (ESC.label y : xs) ys
---         go _ xs [] = xs
---     in  go (ESC.initState bitAssigns) [] . map lookupAssign
+    reduce _ xs [] = xs
+    reduce state xs (y:ys) =
+      case ESC.search $ foldl (flip ESC.updateState) state ys of
+      [_] -> reduce state xs ys
+      _ -> reduce (ESC.updateState y state) (ESC.label y : xs) ys

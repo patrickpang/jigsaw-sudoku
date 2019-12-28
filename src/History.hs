@@ -24,14 +24,15 @@ redoMove history@History{future=[]} present = (present, history)
 addMove :: History -> Board -> History
 addMove history@History{past} present = history{past=(present:past), future=[]}
 
-locateHistory :: FilePath -> FilePath
-locateHistory boardFilename = replaceExtension boardFilename ".log"
+locateHistory :: Maybe FilePath -> Maybe FilePath
+locateHistory = fmap (\boardFilename -> replaceExtension boardFilename ".log")
 
 pastFutureSeparator :: String
 pastFutureSeparator = "---"
 
-loadHistory :: FilePath -> Board -> IO History
-loadHistory filename present = do
+loadHistory :: Maybe FilePath -> Board -> IO History
+
+loadHistory (Just filename) present = do
   hasHistory <- doesFileExist filename
   if hasHistory then do
     content <- readFile filename
@@ -42,19 +43,23 @@ loadHistory filename present = do
       future = map parseBoardCompact futureRows
       history = History{initial, past, future}
     return history
-  else do
-    return History{initial=present, past=[], future=[]}
+  else loadHistory Nothing present
 
-saveHistory :: History -> FilePath -> IO ()
-saveHistory History{initial, past, future} filename = do
+loadHistory Nothing present = return History{initial=present, past=[], future=[]}
+
+saveHistory :: History -> Maybe FilePath -> IO ()
+
+saveHistory History{initial, past, future} (Just filename) = do
   let
     initialRow = dumpBoardCompact initial
     pastRows = map dumpBoardCompact past
     futureRows = map dumpBoardCompact future
     content = unlines $ [initialRow] ++ pastRows ++ [pastFutureSeparator] ++ futureRows
-  
+    
   writeFile filename content
-
+    
+saveHistory _ Nothing = return ()
+    
 parseBoardCompact :: String -> Board
 parseBoardCompact line =
   listArray ((0, 0), (8, 8)) $ 

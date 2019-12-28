@@ -4,6 +4,7 @@ module Main where
   
 import Game
 import Logic
+import Persistence
 import History
 import Solver (solveGame)
 
@@ -23,8 +24,8 @@ main = do
   case args of
     ["-h"] -> mainHelp
     ["--help"] -> mainHelp
-    [filename] -> mainGame filename
-    [] -> mainGame "maps/map-test.txt" -- TODO: generate
+    [filename] -> mainGame $ Just filename
+    [] -> mainGame Nothing
     _ -> mainHelp
 
 mainHelp :: IO ()
@@ -33,13 +34,12 @@ mainHelp = do
   -- TODO: docopt format USAGE
 
 data State =
-  Playing {game :: Game, history :: History, focus :: Coord, solution :: Board, filename :: FilePath}
+  Playing {game :: Game, history :: History, focus :: Coord, solution :: Board, filename :: Maybe FilePath}
 
-mainGame :: String -> IO ()
+mainGame :: Maybe FilePath -> IO ()
 mainGame filename = do
   game <- loadGame filename
   history <- loadHistory (locateHistory filename) (board game)
-  -- TODO: generate for new file
   (screenWidth, screenHeight) <- getScreenSize
   let 
     solution = solveGame game
@@ -52,7 +52,7 @@ mainGame filename = do
     window = InWindow "Jigsaw Sudoku" (windowWidth, windowHeight) (windowLeft, windowTop)
   
   playIO window white 100 state renderWorld handleEvent updateWorld
-  
+
 updateWorld :: Float -> State -> IO State
 updateWorld _ state = return state
 

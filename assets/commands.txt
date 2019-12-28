@@ -1,0 +1,10 @@
+Commands
+
+Arrow Keys:  Move focus
+1 - 9:  Input number
+Delete / Backspace:  Erase number
+h:  Show hint
+s:  Solve
+u:  Undo
+r:  Redo
+q / Esc:  Quit

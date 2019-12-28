@@ -1,0 +1,20 @@
+jigsaw-sudoku: Jigsaw Sudoku Game written in Haskell
+
+Usage: 
+  jigsaw-sudoku [filename]
+  jigsaw-sudoku -h | --help
+
+Options:
+  -h --help   Show this screen.
+
+Examples:
+  - Generate a new game and play without saving
+    jigsaw-sudoku
+
+  - Load a saved game and play with autosave
+    jigsaw-sudoku map.txt
+
+  - Generate a new game and play with autosave
+    jigsaw-sudoku non-existent-file.txt
+
+Github Repo: https://github.com/patrickpang/jigsaw-sudoku

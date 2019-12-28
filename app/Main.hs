@@ -7,13 +7,17 @@ import Logic
 import Persistence
 import History
 import Solver (solveGame)
+import Help
 
 import Colors
 
 import Data.List
+import Data.List.Split (splitOn)
 import Data.Array
 import Data.Char (digitToInt)
+import Data.Maybe
 import System.Environment (getArgs)
+import System.Exit (exitSuccess)
 import System.FilePath (takeBaseName)
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
@@ -53,33 +57,57 @@ renderWorld :: State -> IO Picture
 renderWorld Playing{game, focus, filename} = return $ pictures 
   [
     renderGame game focus,
-    renderFilename filename
+    renderHeader filename,
+    renderUsage,
+    renderCommands
   ]
 
-renderFilename :: Maybe FilePath -> Picture
-renderFilename filename = 
-  translate (-180) 200 $ scale 0.2 0.2 $ text $ maybe "" takeBaseName filename
+renderHeader :: Maybe FilePath -> Picture
+renderHeader filename = 
+  pictures [brand, author, title, autosave]
+  where
+    brand = translate (-140) 300 $ scale 0.3 0.3 $ text "Jigsaw Sudoku"
+    author = translate (-80) 270 $ scale 0.1 0.1 $ text "made by Patrick Pang"
 
+    title = translate (-180) 200 $ scale 0.2 0.2 $ text $ maybe "" takeBaseName filename
+    autosave = translate 120 200 $ scale 0.1 0.1 $ text $ if isJust filename then "autosaved" else ""
   
+renderUsage :: Picture
+renderUsage = translate (-600) 200 $ renderText usageString
+
+renderCommands :: Picture
+renderCommands = translate 260 200 $ renderText commandsString
+
+renderText :: String -> Picture
+renderText s = pictures
+  [
+    translate 0 (i * (-height)) $ scale 0.1 0.1 $ text line
+    | (i, line) <- zip [0..] $ splitOn "\n" s
+  ]
+  where height = 20
+
 cellLength :: Float
 cellLength = 40.0
 
 renderGame :: Game -> Coord -> Picture
 renderGame game focus = pictures 
   [
-    renderBoard game,
-    renderFocus focus
-  ]
-
-renderBoard :: Game -> Picture
-renderBoard game = pictures
-  [
-    translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $ 
-      renderCell cell ((blocks game) ! (r,c)) (elem (r, c) conflicts)
-    | ((r, c), cell) <- assocs $ board game
+    renderBoard game conflicts,
+    renderFocus focus,
+    renderStatus conflicts
   ]
   where
     conflicts = allConflicts game
+
+renderBoard :: Game -> [Coord] -> Picture
+renderBoard game conflicts = pictures
+  [
+    translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $ 
+      renderCell cell block hasConflicts
+    | ((r, c), cell) <- assocs $ board game,
+    let block = (blocks game) ! (r,c), 
+    let hasConflicts = elem (r, c) conflicts
+  ]
 
 renderCell :: Cell -> Int -> Bool -> Picture
 renderCell cell block hasConflicts = pictures 
@@ -95,6 +123,9 @@ renderFocus (r, c) =
   color black $ translate (((fromIntegral c) - 4) * cellLength) ((4 - (fromIntegral r)) * cellLength) $
     rectangleWire cellLength cellLength
 
+renderStatus :: [Coord] -> Picture
+renderStatus conflicts =
+  translate (-180) (-200) $ scale 0.1 0.1 $ text $ "No. of conflicts: " ++ show (length conflicts)
 
 handleEvent :: Event -> State -> IO State
 
@@ -112,6 +143,8 @@ handleEvent (EventKey (SpecialKey k) Up _ _) state@(Playing{game, focus, history
     updateAfterMove state $ makeMove game initial focus (fmap (+1) (elemIndex k keys)) 
   | k == KeyDelete || k == KeyBackspace = -- Erase
     updateAfterMove state $ makeMove game initial focus Nothing
+  | k == KeyEsc = -- Quit
+    exitSuccess
   | otherwise = return state
   where
     keys = [KeyPad1, KeyPad2, KeyPad3, KeyPad4, KeyPad5, KeyPad6, KeyPad7, KeyPad8, KeyPad9]
@@ -129,6 +162,8 @@ handleEvent (EventKey (Char c) Up _ _) state@(Playing{game, focus, solution, his
     updateAfterUndoRedo state $ undoMove history $ board game
   | c == 'r' = -- Redo
     updateAfterUndoRedo state $ redoMove history $ board game
+  | c == 'q' = -- Quit
+    exitSuccess
   | otherwise = return state
 
 handleEvent _ state = return state

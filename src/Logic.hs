@@ -3,11 +3,11 @@
 module Logic where
 
 import Game
+import Utils (groupSortOn)
 
 import Data.List
 import Data.Array
 import Data.Maybe
-import Data.Function
 
 makeMove :: Game -> Board -> Coord -> Cell -> Game
 makeMove game initial coord cell =
@@ -38,9 +38,6 @@ allConflicts Game{board, blocks} =
         groups = groupSortOn snd $ occupied
       in
         concat [map fst group | group <- groups, length group > 1]
-    
-    groupSortOn :: Ord b => (a -> b) -> [a] -> [[a]]
-    groupSortOn f xs = groupBy ((==) `on` f) $ sortOn f xs
   
     -- find conflicting cells globally
     -- for highlight of errors before rendering

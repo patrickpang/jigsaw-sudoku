@@ -1,6 +1,6 @@
 -- Modified from https://hub.darcs.net/thielema/set-cover/browse/example/Sudoku.hs
 
-module Solver (solveGame) where
+module Solver where
 
 import Game
 

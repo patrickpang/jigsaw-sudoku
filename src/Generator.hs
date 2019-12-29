@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NamedFieldPuns, BangPatterns #-}
 
 module Generator where
 
@@ -9,13 +9,20 @@ import SetCover
 import Data.List
 import Data.Array
 import Data.Graph
+import System.Timeout (timeout)
 import qualified Math.SetCover.Exact as ESC
 
 generateGame :: IO Game
 generateGame = do
-  blocks <- generateBlocks
-  board <- generateBoard blocks
-  return Game{board, blocks}
+  result <- timeout (5 * 1000000) generate
+  case result of
+    Just game -> return game
+    Nothing -> generateGame
+  where
+    generate = do
+      blocks <- generateBlocks
+      board <- generateBoard blocks
+      return Game{board, blocks}
 
 -- generate blocks
 
@@ -107,7 +114,7 @@ generateBoard blocks = do
   a <- shuffle $ assigns blocks
   let
     solution = head $ ESC.partitions $ ESC.bitVectorFromSetAssigns a
-    minSolution = minimizeSolution blocks solution
+    !minSolution = minimizeSolution blocks solution
     emptyBoard = listArray ((0, 0), (8, 8)) $ replicate 81 Nothing
   return $ emptyBoard // [((r, c), (Just n)) | ((r, c), n) <- minSolution]
 

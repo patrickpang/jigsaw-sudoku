@@ -7,10 +7,9 @@ import Logic
 import Persistence
 import History
 import Solver (solveGame)
-import Help
 import State
 import GamePicture
-import TextPicture
+import HelpPicture
 
 import System.Environment (getArgs)
 import Graphics.Gloss

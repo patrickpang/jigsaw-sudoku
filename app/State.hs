@@ -47,6 +47,8 @@ handleEvent (EventKey (Char c) Up _ _) state@(State{game, focus, solution, histo
     updateAfterMove state $ makeMove game initial focus (solution ! focus)
   | c == 's' = -- Solve
     updateAfterMove state $ game{board = solution}
+  | c == 'c' = -- Clear
+    updateAfterMove state $ game{board = initial}
   | c == 'u' = -- Undo
     updateAfterUndoRedo state $ undoMove history $ board game
   | c == 'r' = -- Redo

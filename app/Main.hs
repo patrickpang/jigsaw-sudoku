@@ -33,7 +33,7 @@ mainGame filename = do
   game <- loadGame filename
   history <- loadHistory (locateHistory filename) (board game)
   let 
-    solution = solveGame game
+    solution = solveGame $ game{board = initial history}
     state = State{game, focus=(0,0), solution, filename, history}
   
   playIO FullScreen white 100 state renderWorld handleEvent updateWorld
@@ -50,7 +50,8 @@ renderWorld State{game, history, focus, filename} = return $ pictures
 
     renderHeader filename,
     renderUsage,
-    renderCommands
+    renderCommands,
+    renderRules
   ]
   where
     conflicts = allConflicts game

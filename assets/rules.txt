@@ -1,0 +1,4 @@
+Jigsaw Sudoku is a variation of the classic Sudoku.
+The regular 3x3 boxes are replaced by 9 irregular blocks.
+The objective is to fill the 9x9 grid such that each
+column, row, and block contains all digits from 1 to 9.

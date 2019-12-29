@@ -24,6 +24,9 @@ redoMove history@History{future=[]} present = (present, history)
 addMove :: History -> Board -> History
 addMove history@History{past} present = history{past=(present:past), future=[]}
 
+countMoves :: History -> Int
+countMoves history@History{past} = length past
+
 locateHistory :: Maybe FilePath -> Maybe FilePath
 locateHistory = fmap (\boardFilename -> replaceExtension boardFilename ".log")
 

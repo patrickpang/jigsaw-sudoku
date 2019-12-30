@@ -34,7 +34,7 @@ mainGame filename = do
   history <- loadHistory (locateHistory filename) (board game)
   let 
     solution = solveGame $ game{board = initial history}
-    state = State{game, focus=(0,0), solution, filename, history}
+    state = State{game, focus=(0,0), solution, filename, history, showHelp=True}
   
   playIO FullScreen white 100 state renderWorld handleEvent updateWorld
 
@@ -42,17 +42,13 @@ updateWorld :: Float -> State -> IO State
 updateWorld _ state = return state
 
 renderWorld :: State -> IO Picture
-renderWorld State{game, history, focus, filename} = return $ pictures 
+renderWorld State{game, history, focus, filename, showHelp} = return $ pictures $
   [
+    renderHeader filename,
     renderBoard game (initial history) conflicts,
     renderFocus focus,
-    renderStatus conflicts ended steps,
-
-    renderHeader filename,
-    renderUsage,
-    renderCommands,
-    renderRules
-  ]
+    renderStatus conflicts ended steps
+  ] ++ if showHelp then [renderUsage, renderCommands, renderRules] else []
   where
     conflicts = allConflicts game
     ended = isEnded game

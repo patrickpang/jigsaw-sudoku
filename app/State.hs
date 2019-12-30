@@ -14,7 +14,7 @@ import System.Exit (exitSuccess)
 import Graphics.Gloss.Interface.IO.Game
   
 data State =
-  State {game :: Game, history :: History, focus :: Coord, solution :: Board, filename :: Maybe FilePath}
+  State {game :: Game, history :: History, focus :: Coord, solution :: Board, filename :: Maybe FilePath, showHelp :: Bool}
 
 handleEvent :: Event -> State -> IO State
 
@@ -38,7 +38,7 @@ handleEvent (EventKey (SpecialKey k) Up _ _) state@(State{game, focus, history=H
   where
     keys = [KeyPad1, KeyPad2, KeyPad3, KeyPad4, KeyPad5, KeyPad6, KeyPad7, KeyPad8, KeyPad9]
 
-handleEvent (EventKey (Char c) Up _ _) state@(State{game, focus, solution, history=history@History{initial}})
+handleEvent (EventKey (Char c) Up _ _) state@(State{game, focus, solution, history=history@History{initial}, showHelp})
   | '1' <= c && c <= '9' = -- Input
     updateAfterMove state $ makeMove game initial focus (Just $ digitToInt c)
   | c == '\b' = -- Erase
@@ -53,6 +53,8 @@ handleEvent (EventKey (Char c) Up _ _) state@(State{game, focus, solution, histo
     updateAfterUndoRedo state $ undoMove history $ board game
   | c == 'r' = -- Redo
     updateAfterUndoRedo state $ redoMove history $ board game
+  | c == 'm' = -- Toggle Manual
+    return state{showHelp = not showHelp}
   | c == 'q' = -- Quit
     exitSuccess
   | otherwise = return state

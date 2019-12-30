@@ -1,5 +1,7 @@
 Commands
 
+Please switch to English input mode in your system
+
 Arrow Keys:  Move focus
 1 - 9:  Input number
 Delete / Backspace:  Erase number
@@ -8,4 +10,5 @@ s:  Solve all
 c:  Clear all
 u:  Undo
 r:  Redo
+m: Toggle manual
 q / Esc:  Quit

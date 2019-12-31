@@ -12,9 +12,11 @@ import Data.Graph
 import System.Timeout (timeout)
 import qualified Math.SetCover.Exact as ESC
 
+-- | Generate game
 generateGame :: IO Game
 generateGame = do
-  result <- timeout (5 * 1000000) generate
+  -- retry to avoid stuck in time consumption minimization
+  result <- timeout (5 * 1000000) generate 
   case result of
     Just game -> return game
     Nothing -> generateGame
@@ -24,8 +26,7 @@ generateGame = do
       board <- generateBoard blocks
       return Game{board, blocks}
 
--- generate blocks
-
+-- | Generate blocks
 generateBlocks :: IO Blocks
 generateBlocks = do
   -- start with regular blocks layout
@@ -106,20 +107,19 @@ isRegularBlock cells =
     rows = nub $ map fst cells
     columns = nub $ map snd cells
 
--- generate board
 -- Modified from https://hub.darcs.net/thielema/set-cover/browse/example/Sudoku.hs
 
+-- | Generate board
 generateBoard :: Blocks -> IO Board
 generateBoard blocks = do
   a <- shuffle $ assigns blocks
   let
     solution = head $ ESC.partitions $ ESC.bitVectorFromSetAssigns a
-    !minSolution = minimizeSolution blocks solution
+    !minSolution = minimizeSolution blocks solution -- strict evaluation for effective timeout
     emptyBoard = listArray ((0, 0), (8, 8)) $ replicate 81 Nothing
   return $ emptyBoard // [((r, c), (Just n)) | ((r, c), n) <- minSolution]
 
--- minimize: a single solution
-
+-- | Minimize a solution to partially filled board
 minimizeSolution :: Blocks -> [Association] -> [Association]
 minimizeSolution blocks solution = 
   reduce (ESC.initState initAssigns) [] solutionAssigns

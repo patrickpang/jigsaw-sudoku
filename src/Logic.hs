@@ -9,16 +9,14 @@ import Data.List
 import Data.Array
 import Data.Maybe
 
+-- | Make moves with checking of initially filled cells
 makeMove :: Game -> Board -> Coord -> Cell -> Game
 makeMove game initial coord cell =
   if isNothing $ initial ! coord 
   then game{board = (board game) // [(coord, cell)]} 
   else game
-  -- assumption: valid number (from UI)
-  -- replace both empty and occupied cell
-  -- no need to check conflicts, which will be shown by UI
-  -- TODO: initial cells -> return same board
 
+-- | Find conflicting cells globally
 allConflicts :: Game -> [Coord]
 allConflicts Game{board, blocks} =
   union blockConflicts $ union rowConflicts columnConflicts
@@ -39,10 +37,6 @@ allConflicts Game{board, blocks} =
       in
         concat [map fst group | group <- groups, length group > 1]
   
-    -- find conflicting cells globally
-    -- for highlight of errors before rendering
-
 isEnded :: Game -> Bool
 isEnded game =
   (all isJust $ elems $ board game) && (null $ allConflicts game)
-  -- no Nothing & no conflicts

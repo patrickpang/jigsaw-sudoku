@@ -18,6 +18,7 @@ data State =
 
 handleEvent :: Event -> State -> IO State
 
+-- Moving focus
 handleEvent (EventKey (SpecialKey KeyUp) Up _ _) state@(State{focus}) = 
   return state{focus = moveFocus focus (-1) 0}
 handleEvent (EventKey (SpecialKey KeyDown) Up _ _) state@(State{focus}) = 
@@ -61,6 +62,7 @@ handleEvent (EventKey (Char c) Up _ _) state@(State{game, focus, solution, histo
 
 handleEvent _ state = return state
 
+-- | Update state, save game and history after making moves
 updateAfterMove :: State -> Game -> IO State
 updateAfterMove state@(State{game, history, filename}) game' = do
   if board game /= board game' then do
@@ -71,6 +73,7 @@ updateAfterMove state@(State{game, history, filename}) game' = do
   else do
     return state
 
+-- | Update state, save game and history after undo / redo
 updateAfterUndoRedo :: State -> (Board, History) -> IO State
 updateAfterUndoRedo state@(State{game, filename}) (board', history') = do
   if board' /= board game then do
@@ -81,6 +84,7 @@ updateAfterUndoRedo state@(State{game, filename}) (board', history') = do
   else do
     return state
 
+-- | Update focus position
 moveFocus :: Coord -> Int -> Int -> Coord
 moveFocus (r, c) dr dc =
   let 

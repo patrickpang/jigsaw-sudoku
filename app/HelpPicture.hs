@@ -36,6 +36,7 @@ renderCommands = translate 260 200 $ renderParagraph commandsString
 renderRules :: Picture
 renderRules = translate (-180) (-280) $ renderParagraph rulesString
 
+-- | Helper function for rendering multiline text
 renderParagraph :: String -> Picture
 renderParagraph paragraph = pictures $ 
   map (\(i, line) -> translate 0 (i * (-20)) $ scale 0.1 0.1 $ text line) $

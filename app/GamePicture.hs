@@ -3,7 +3,6 @@
 module GamePicture where
 
 import Game
-import Text
 
 import Data.Array
 import Data.Maybe
@@ -44,7 +43,7 @@ renderFocus (r, c) =
 
 renderStatus :: [Coord] -> Bool -> Int -> Picture
 renderStatus conflicts ended steps =
-  translate (-180) (-200) $ renderText $
+  translate (-180) (-200) $ scale 0.1 0.1 $ text $
   if ended then "Congratulations! You've finished in " ++ show steps ++ " steps!" 
   else "No. of conflicts: " ++ show (length conflicts)
 

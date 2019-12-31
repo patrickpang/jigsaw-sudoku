@@ -28,13 +28,8 @@ dependencies:
   - filepath == 1.4.*
   - directory == 1.3.*
   - file-embed == 0.0.11.*
-  - bytestring == 0.10.*
   - set-cover == 0.0.9
   - gloss == 1.13.*
-  - gloss-juicy == 0.2.3
-  - JuicyPixels == 3.3.*
-  - FontyFruity == 0.5.*
-  - Rasterific == 0.7.*
 
 library:
   source-dirs: src

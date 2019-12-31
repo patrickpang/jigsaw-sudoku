@@ -33,16 +33,17 @@ You can also build the game from source with a proper [stack](https://docs.haske
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
-Haskell                      9       425       80        45      300         28
-Markdown                     2         4        1         0        3          0
-YAML                         2       123       12        62       49          0
+Haskell                     14       654      123        31      500         54
+Plain Text                   3        38        8         0       30          0
+Markdown                     2        52       14         0       38          0
+YAML                         2       123       11        61       51          0
 License                      1        30        6         0       24          0
 gitignore                    1         3        0         0        3          0
 ───────────────────────────────────────────────────────────────────────────────
-Total                       15       585       99       107      379         28
+Total                       23       900      162        92      646         54
 ───────────────────────────────────────────────────────────────────────────────
-Estimated Cost to Develop $9,753
-Estimated Schedule Effort 2.641034 months
-Estimated People Required 0.437469
+Estimated Cost to Develop $17,074
+Estimated Schedule Effort 3.267231 months
+Estimated People Required 0.619034
 ───────────────────────────────────────────────────────────────────────────────
 ```
